@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Port Moresby Power Outage Tracker{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <script>
+    // Applies the saved theme before first paint, so there's no flash of
+    // the wrong theme on load. Defaults to dark, same as PNG Power's site.
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-header__brand" href="{{ url_for('index') }}">
+        <span class="site-header__bolt">&#9889;</span>
+        <span>PoM Outage Tracker</span>
+      </a>
+      <nav class="site-header__nav">
+        <a href="{{ url_for('index') }}">Map</a>
+        <a href="{{ url_for('report') }}">Report outage</a>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+        {% endif %}
+        <a href="{{ url_for('admin') }}">Admin</a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme">
+          <span class="theme-toggle__icon-dark">&#9728;</span>
+          <span class="theme-toggle__icon-light">&#9789;</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Unofficial community project. Data is collected from public sources and may be delayed or
+      incomplete &mdash; for urgent issues call PNG Power's National Call Centre on <strong>116</strong>.
+    </p>
+  </footer>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

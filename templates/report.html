@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Report an outage &mdash; Port Moresby Power Outage Tracker{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <div class="auth__card" style="max-width:520px;">
+    <h1>Report a power outage</h1>
+    <p class="muted">
+      Seeing an outage that's not on the map yet? Let us know. Reports from
+      multiple people in the same area are combined automatically, and
+      admin-verified reports get a confidence boost.
+    </p>
+
+    {% if success %}
+      <p class="success">
+        {% if is_new_outage %}
+          Thanks — your report has been logged and is awaiting verification.
+        {% else %}
+          Thanks — this matches an existing report ({{ report_count }} people have
+          now reported it), which helps us verify it faster.
+        {% endif %}
+      </p>
+    {% endif %}
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+    <form method="POST" action="{{ url_for('report') }}" enctype="multipart/form-data" class="admin-form">
+      {% if geocoding_enabled %}
+      <label>Address or landmark (optional)
+        <input type="text" name="address" placeholder="e.g. Gordons Market">
+      </label>
+      <p class="muted" style="font-size:0.78rem; margin-top:-8px;">
+        We'll match this to the nearest suburb automatically — or just pick one below.
+      </p>
+      {% endif %}
+
+      <label>Suburb
+        <select name="suburb">
+          <option value="">Select a suburb&hellip;</option>
+          {% for suburb in suburbs %}<option value="{{ suburb }}">{{ suburb }}</option>{% endfor %}
+        </select>
+      </label>
+
+      <label>What are you seeing? <span style="color:var(--red)">*</span>
+        <textarea name="description" rows="3" required
+                  placeholder="e.g. Whole street is dark, been out since around 2pm"></textarea>
+      </label>
+
+      <label>Time you noticed it
+        <input type="time" name="time_noticed">
+      </label>
+
+      <label>Photo (optional)
+        <input type="file" name="photo" accept="image/*">
+      </label>
+
+      <label>Your contact (optional, for follow-up only)
+        <input type="text" name="contact" placeholder="Email or phone">
+      </label>
+
+      <button type="submit">Submit report</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

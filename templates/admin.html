@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Admin &mdash; Port Moresby Power Outage Tracker{% endblock %}
+
+{% block content %}
+<section class="admin">
+  {% if not is_admin %}
+    <div class="admin__login">
+      <h1>Admin login</h1>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      <form method="POST" action="{{ url_for('admin') }}">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Log in</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="admin__header">
+      <h1>Admin</h1>
+      <div>
+        <form method="POST" action="{{ url_for('admin_update_now') }}" style="display:inline">
+          <button type="submit" class="btn--ghost">Run update now</button>
+        </form>
+        <a href="{{ url_for('admin_logout') }}" class="btn--ghost">Log out</a>
+      </div>
+    </div>
+
+    <div class="admin__status-strip">
+      <span>{{ subscriber_count }} subscriber{{ 's' if subscriber_count != 1 else '' }}</span>
+      <span class="badge {{ 'badge--restored' if email_enabled else 'badge--active' }}">
+        Email {{ 'enabled' if email_enabled else 'not configured' }}
+      </span>
+      <span class="badge {{ 'badge--restored' if sms_enabled else 'badge--active' }}">
+        SMS {{ 'enabled' if sms_enabled else 'not configured' }}
+      </span>
+      <span class="badge {{ 'badge--restored' if weather_enabled else 'badge--active' }}">
+        Weather {{ 'enabled' if weather_enabled else 'not configured' }}
+      </span>
+      <span class="badge {{ 'badge--restored' if geocoding_enabled else 'badge--active' }}">
+        Geocoding {{ 'enabled' if geocoding_enabled else 'not configured' }}
+      </span>
+    </div>
+
+    {% if pending_reports %}
+    <div class="admin__add">
+      <h2>Pending reports ({{ pending_reports|length }})</h2>
+      <p class="muted">User-submitted reports awaiting verification. Verifying boosts confidence and, if promoted to Active, notifies subscribers.</p>
+      <table class="admin-table">
+        <thead>
+          <tr><th>Suburb</th><th>Description</th><th>Reports</th><th>Confidence</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for o in pending_reports %}
+          <tr>
+            <td><a href="{{ url_for('outage_detail', outage_id=o.id) }}">{{ o.suburb }}</a></td>
+            <td>{{ o.reason or '' }}</td>
+            <td>{{ o.report_count }}</td>
+            <td>{{ o.confidence_score }}%</td>
+            <td class="admin-table__actions">
+              <form method="POST" action="{{ url_for('admin_verify', outage_id=o.id) }}">
+                <input type="hidden" name="new_status" value="Verified">
+                <button type="submit" class="btn--tiny">Verify</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_verify', outage_id=o.id) }}">
+                <input type="hidden" name="new_status" value="Active">
+                <button type="submit" class="btn--tiny">Verify &amp; publish</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <div class="admin__add">
+      <h2>Analytics</h2>
+      <div class="stat-strip" style="padding:0; margin-top:10px;">
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stats.average_restoration_minutes and (stats.average_restoration_minutes ~ ' min') or '—' }}</span>
+          <span class="stat-card__label">Avg. restoration time</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value">{{ '%02d:00'|format(stats.peak_outage_hour) if stats.peak_outage_hour is not none else '—' }}</span>
+          <span class="stat-card__label">Peak outage hour</span>
+        </div>
+      </div>
+      {% if stats.worst_affected_suburbs %}
+      <h3 style="font-size:0.95rem; margin:16px 0 6px;">Worst affected suburbs</h3>
+      <div class="weather-correlation">
+        {% for row in stats.worst_affected_suburbs %}
+        <div class="weather-correlation__row">
+          <span>{{ row.suburb }}</span>
+          <span class="badge badge--active">{{ row.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if weather_correlation %}
+    <div class="admin__add">
+      <h2>Weather correlation</h2>
+      <p class="muted">Outage counts by recorded weather condition at time of report.</p>
+      <div class="weather-correlation">
+        {% for row in weather_correlation %}
+        <div class="weather-correlation__row">
+          <span>{{ row.weather_condition }}</span>
+          <span class="badge badge--active">{{ row.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="admin__add">
+      <h2>Add a manually-verified outage</h2>
+      <p class="muted">
+        Use this for updates confirmed via PNG Power's Facebook page or other sources that
+        can't be scraped automatically.
+      </p>
+      <form method="POST" action="{{ url_for('admin_add') }}" class="admin-form">
+        <div class="admin-form__row">
+          <label>Suburb
+            <select name="suburb" required>
+              {% for suburb in suburbs %}<option value="{{ suburb }}">{{ suburb }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Area / street <input type="text" name="area"></label>
+        </div>
+        <div class="admin-form__row">
+          <label>Status
+            <select name="status" required>
+              {% for s in statuses %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Type
+            <select name="outage_type" required>
+              {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+            </select>
+          </label>
+        </div>
+        <div class="admin-form__row">
+          <label>Date <input type="date" name="date" required></label>
+          <label>Time started <input type="time" name="time_started"></label>
+          <label>Est. restoration <input type="time" name="estimated_restoration"></label>
+        </div>
+        <label>Reason <input type="text" name="reason" placeholder="e.g. Transformer fault"></label>
+        <button type="submit">Add outage</button>
+      </form>
+    </div>
+
+    <div class="admin__list">
+      <h2>All outages ({{ outages|length }})</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Suburb</th><th>Status</th><th>Type</th><th>Started</th>
+            <th>ETA</th><th>Reason</th><th>Confidence</th><th>Source</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in outages %}
+          <tr>
+            <td><a href="{{ url_for('outage_detail', outage_id=o.id) }}">{{ o.suburb }}</a></td>
+            <td><span class="badge badge--{{ o.status|lower|replace(' ', '-') }}">{{ o.status }}</span></td>
+            <td>{{ o.outage_type or '' }}</td>
+            <td>{{ o.date }} {{ o.time_started or '' }}</td>
+            <td>{{ o.estimated_restoration or '' }}</td>
+            <td>{{ o.reason or '' }}</td>
+            <td>{{ o.confidence_score }}%{% if o.report_count %} ({{ o.report_count }} reports){% endif %}</td>
+            <td>{{ o.source or '' }}</td>
+            <td class="admin-table__actions">
+              {% if o.status != 'Restored' %}
+              <form method="POST" action="{{ url_for('admin_restore', outage_id=o.id) }}">
+                <button type="submit" class="btn--tiny">Mark restored</button>
+              </form>
+              {% endif %}
+              <form method="POST" action="{{ url_for('admin_delete', outage_id=o.id) }}">
+                <button type="submit" class="btn--tiny btn--danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="9" class="muted">No outages recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

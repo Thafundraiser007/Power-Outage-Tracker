@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+*.egg-info/
+
+# Project data / logs (regenerated automatically, shouldn't be in git)
+data/*.db
+logs/*.log
+debug_planned.html
+debug_unplanned.html
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Environment variables / secrets
+.env
+.env.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Playwright
+.cache/ms-playwright/

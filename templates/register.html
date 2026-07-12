@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Register &mdash; Port Moresby Power Outage Tracker{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <div class="auth__card">
+    <h1>Create an account</h1>
+    <p class="muted">Save favourite suburbs and get a personal dashboard of outages near you.</p>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="POST" action="{{ url_for('register') }}" class="admin-form">
+      <label>Email
+        <input type="email" name="email" required autocomplete="email">
+      </label>
+      <label>Password
+        <input type="password" name="password" required minlength="8" autocomplete="new-password">
+      </label>
+      <p class="muted" style="font-size:0.78rem;">At least 8 characters.</p>
+      <button type="submit">Create account</button>
+    </form>
+    <p class="auth__switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+  </div>
+</section>
+{% endblock %}

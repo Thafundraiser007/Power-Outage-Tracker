@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero__text">
+    <h1>Is the power out near you?</h1>
+    <p id="last-updated" class="hero__meta">Checking last update time&hellip;</p>
+    <div id="weather-widget" class="weather-widget" hidden>
+      <span class="weather-widget__icon">&#9925;</span>
+      <span id="weather-widget-text"></span>
+    </div>
+  </div>
+  <div class="hero__search">
+    <input
+      type="text"
+      id="suburb-search"
+      list="suburb-list"
+      placeholder="Search a suburb (e.g. Boroko)"
+      autocomplete="off"
+    />
+    <datalist id="suburb-list">
+      {% for suburb in suburbs %}
+        <option value="{{ suburb }}">
+      {% endfor %}
+    </datalist>
+    <button id="search-btn" type="button">Search</button>
+    <button id="clear-search-btn" type="button" class="btn--ghost">Clear</button>
+    <button id="notify-btn" type="button" class="btn--ghost">&#128276; Get alerts</button>
+    <a href="{{ url_for('report') }}" class="btn--ghost" style="text-decoration:none; display:inline-flex; align-items:center;">&#9888;&#65039; Report outage</a>
+  </div>
+</section>
+
+<section class="quick-access">
+  <a href="{{ url_for('index') }}#map" class="quick-access__card">
+    <span class="quick-access__icon">&#128506;&#65039;</span>
+    <span class="quick-access__title">Outage Map</span>
+    <span class="quick-access__subtitle">Live grid status</span>
+  </a>
+  <a href="{{ url_for('report') }}" class="quick-access__card">
+    <span class="quick-access__icon">&#9888;&#65039;</span>
+    <span class="quick-access__title">Report an Outage</span>
+    <span class="quick-access__subtitle">Tell us what you're seeing</span>
+  </a>
+  <a href="#" id="quick-access-notify" class="quick-access__card">
+    <span class="quick-access__icon">&#128276;</span>
+    <span class="quick-access__title">Get Alerts</span>
+    <span class="quick-access__subtitle">Email or SMS by suburb</span>
+  </a>
+  <a href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}" class="quick-access__card">
+    <span class="quick-access__icon">&#11088;</span>
+    <span class="quick-access__title">{{ 'Your Dashboard' if session.get('user_id') else 'Save Favourites' }}</span>
+    <span class="quick-access__subtitle">Track your suburbs</span>
+  </a>
+</section>
+
+<div class="subscribe-panel" id="subscribe-panel" hidden>
+  <div class="subscribe-panel__inner">
+    <h2>Get notified about a suburb</h2>
+    <p class="muted">We'll email or text you when a new outage is reported, and when it's restored.</p>
+    <form id="subscribe-form">
+      <label>Suburb
+        <select name="suburb" required>
+          {% for suburb in suburbs %}<option value="{{ suburb }}">{{ suburb }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Email <input type="email" name="email" placeholder="you@example.com"></label>
+      <label>Phone <input type="tel" name="phone" placeholder="+675..."></label>
+      <p class="muted" style="font-size:0.78rem;">Enter at least one. You can unsubscribe anytime from the link in any alert.</p>
+      <div class="subscribe-panel__actions">
+        <button type="submit">Subscribe</button>
+        <button type="button" id="subscribe-cancel" class="btn--ghost">Cancel</button>
+      </div>
+      <p id="subscribe-message"></p>
+    </form>
+  </div>
+</div>
+
+<section class="filter-tabs" id="filter-tabs">
+  <button class="filter-tab filter-tab--active" data-status="">All</button>
+  <button class="filter-tab" data-status="Active">Active</button>
+  <button class="filter-tab" data-status="Planned">Planned</button>
+  <button class="filter-tab" data-status="Restored">Restored</button>
+</section>
+
+<section id="national-summary-banner" class="national-summary" hidden>
+  <span class="national-summary__label">PNG Power reports nationwide:</span>
+  <span id="national-summary-text"></span>
+  <a href="https://pngpower.com.pg/network-map" target="_blank" rel="noopener" class="national-summary__link">Source &#8599;</a>
+</section>
+
+<p class="stat-strip__label">Tracked by this site</p>
+<section class="stat-strip" id="stat-strip">
+  <div class="stat-card">
+    <span class="stat-card__value" id="stat-total">&ndash;</span>
+    <span class="stat-card__label">Total outages</span>
+  </div>
+  <div class="stat-card stat-card--active">
+    <span class="stat-card__value" id="stat-active">&ndash;</span>
+    <span class="stat-card__label">Active now</span>
+  </div>
+  <div class="stat-card stat-card--planned">
+    <span class="stat-card__value" id="stat-planned">&ndash;</span>
+    <span class="stat-card__label">Planned</span>
+  </div>
+  <div class="stat-card stat-card--emergency">
+    <span class="stat-card__value" id="stat-emergency">&ndash;</span>
+    <span class="stat-card__label">Emergency</span>
+  </div>
+</section>
+
+<section class="layout">
+  <div id="map" class="map" data-lat="{{ map_center.lat }}" data-lon="{{ map_center.lon }}" data-zoom="{{ map_zoom }}"></div>
+
+  <div class="outage-list" id="outage-list">
+    <h2>Recent updates</h2>
+    <div id="outage-cards"><p class="muted">Loading outages&hellip;</p></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='map.js') }}"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

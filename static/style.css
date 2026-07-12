@@ -1,0 +1,759 @@
+/* =========================================================================
+   Port Moresby Power Outage Tracker
+   Design system: matches the visual language of PNG Power's own site --
+   an "electric blue" primary accent with glow effects, amber as a
+   secondary/warning accent, light+dark surface tokens with a toggle,
+   a display face for headings, and monospace for stats/data.
+   ========================================================================= */
+
+:root {
+  /* Dark theme (default) */
+  --navy-950: #0a0e1a;
+  --navy-900: #10162a;
+  --navy-800: #171f38;
+  --navy-700: #212b4a;
+  --line: rgba(255, 255, 255, 0.09);
+  --paper: #eef1f6;
+  --paper-dim: #8b93a8;
+
+  --electric-blue: #3b82f6;
+  --electric-blue-dim: #16294f;
+  --electric-glow: rgba(59, 130, 246, 0.35);
+
+  --amber: #f5a623;
+  --amber-dim: #4a3418;
+  --red: #e6553b;
+  --red-dim: #3d211c;
+  --green: #4caf7d;
+  --green-dim: #16342a;
+
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Courier New", monospace;
+
+  --radius: 8px;
+}
+
+[data-theme="light"] {
+  --navy-950: #f7f8fb;
+  --navy-900: #ffffff;
+  --navy-800: #f0f2f7;
+  --navy-700: #e4e8f0;
+  --line: rgba(10, 14, 26, 0.09);
+  --paper: #12172a;
+  --paper-dim: #5c6478;
+
+  --electric-blue: #2563eb;
+  --electric-blue-dim: #dbe7fe;
+  --electric-glow: rgba(37, 99, 235, 0.12);
+
+  --amber-dim: #fdecc8;
+  --red-dim: #fde3dd;
+  --green-dim: #d9f2e6;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--navy-950);
+  color: var(--paper);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a { color: var(--electric-blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* Subtle grid-pattern texture, used behind the hero to match PNG Power's
+   background treatment. Kept very low-opacity so it reads as texture,
+   not noise. */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* --- Theme toggle -------------------------------------------------- */
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper-dim);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-left: 20px;
+}
+.theme-toggle:hover { border-color: var(--electric-blue); color: var(--electric-blue); }
+.theme-toggle__icon-light { display: none; }
+[data-theme="light"] .theme-toggle__icon-dark { display: none; }
+[data-theme="light"] .theme-toggle__icon-light { display: inline; }
+
+/* --- Header -------------------------------------------------------- */
+
+.site-header {
+  background: var(--navy-900);
+  border-bottom: 1px solid var(--line);
+}
+.site-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--paper) !important;
+  letter-spacing: 0.01em;
+}
+.site-header__brand:hover { text-decoration: none; }
+.site-header__bolt { color: var(--amber); }
+.site-header__nav a {
+  margin-left: 20px;
+  color: var(--paper-dim);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.site-header__nav a:hover { color: var(--electric-blue); text-decoration: none; }
+
+/* --- Hero / search --------------------------------------------------- */
+
+.hero {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 20px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: space-between;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 400px;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, var(--electric-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero__text h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.hero__meta {
+  margin: 0;
+  color: var(--paper-dim);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.hero__search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hero__search input {
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  min-width: 220px;
+  font-size: 0.95rem;
+}
+.hero__search input:focus {
+  outline: 2px solid var(--electric-blue);
+  outline-offset: 1px;
+}
+.hero__search button,
+.admin__header button,
+.admin__header a,
+.admin-form button {
+  background: var(--electric-blue);
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+}
+.hero__search button:hover { background: #5a9bf8; }
+.btn--ghost {
+  background: transparent !important;
+  border: 1px solid var(--line) !important;
+  color: var(--paper) !important;
+  font-weight: 500 !important;
+}
+.btn--ghost:hover { border-color: var(--electric-blue) !important; color: var(--electric-blue) !important; }
+
+/* --- Stat strip -------------------------------------------------------- */
+
+.stat-strip {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.stat-card {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--paper-dim);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.stat-card:hover {
+  border-color: var(--electric-blue);
+  transform: translateY(-1px);
+}
+.stat-card__value {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.stat-card__label {
+  color: var(--paper-dim);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stat-card--active { border-left-color: var(--red); }
+.stat-card--active .stat-card__value { color: var(--red); }
+.stat-card--planned { border-left-color: #6ea8fe; }
+.stat-card--planned .stat-card__value { color: #6ea8fe; }
+.stat-card--emergency { border-left-color: var(--amber); }
+.stat-card--emergency .stat-card__value { color: var(--amber); }
+
+/* --- Layout: map + list ------------------------------------------------ */
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 20px;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}
+.map {
+  height: 520px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.outage-list h2 {
+  font-family: var(--font-display);
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+}
+.outage-cards-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.outage-card {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.outage-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.outage-card__suburb {
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+.outage-card__reason {
+  color: var(--paper-dim);
+  font-size: 0.88rem;
+  margin: 4px 0;
+}
+.outage-card__times {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.badge--active { background: var(--red-dim); color: #ffb3a3; }
+.badge--planned { background: #1f3a5c; color: #a9cbff; }
+.badge--restored { background: var(--green-dim); color: #a6e7c6; }
+.badge--reported { background: var(--amber-dim); color: #ffd699; }
+.badge--under-review { background: var(--amber-dim); color: #ffd699; }
+.badge--verified { background: #3b2e5c; color: #d9b8ff; }
+
+[data-theme="light"] .badge--active { color: #b8321c; }
+[data-theme="light"] .badge--planned { background: #dbe7fe; color: #1d4ed8; }
+[data-theme="light"] .badge--restored { color: #15803d; }
+[data-theme="light"] .badge--reported,
+[data-theme="light"] .badge--under-review { color: #92400e; }
+[data-theme="light"] .badge--verified { background: #f0e5ff; color: #7c3aed; }
+
+.muted { color: var(--paper-dim); }
+.error { color: var(--red); font-weight: 600; }
+
+/* --- Subscribe panel -------------------------------------------------- */
+
+.subscribe-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.subscribe-panel__inner {
+  background: var(--navy-900);
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.subscribe-panel__inner h2 {
+  font-family: var(--font-display);
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+#subscribe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  max-width: 420px;
+}
+#subscribe-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+}
+#subscribe-form input, #subscribe-form select {
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+.subscribe-panel__actions {
+  display: flex;
+  gap: 8px;
+}
+.success { color: var(--green); font-weight: 600; }
+
+/* --- Quick-access cards (Map / Report / Alerts / Admin) ------------------ */
+
+.quick-access {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.quick-access__card {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--paper);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.quick-access__card:hover {
+  border-color: var(--electric-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--electric-glow);
+  text-decoration: none;
+}
+.quick-access__icon { font-size: 1.4rem; }
+.quick-access__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+}
+.quick-access__subtitle {
+  color: var(--paper-dim);
+  font-size: 0.8rem;
+}
+
+/* --- Filter tabs -------------------------------------------------- */
+
+.filter-tabs {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-tab {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  color: var(--paper-dim);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.filter-tab:hover { border-color: var(--electric-blue); color: var(--paper); }
+.filter-tab--active {
+  background: var(--electric-blue);
+  border-color: var(--electric-blue);
+  color: #ffffff;
+}
+
+/* --- Footer -------------------------------------------------------- */
+
+.site-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: var(--paper-dim);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+/* --- Admin -------------------------------------------------------- */
+
+.admin {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+.admin__login {
+  max-width: 320px;
+  margin: 60px auto;
+  text-align: center;
+}
+.admin__login form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.admin__login input {
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 10px;
+  border-radius: var(--radius);
+}
+.admin__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.admin__status-strip {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--paper-dim);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.admin__add {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 30px;
+}
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.admin-form__row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+  flex: 1;
+  min-width: 160px;
+}
+.admin-form input, .admin-form select {
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+.admin-form textarea {
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.admin-table th, .admin-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 6px;
+  text-align: left;
+}
+.admin-table th {
+  color: var(--paper-dim);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+.admin-table__actions { display: flex; gap: 6px; }
+.btn--tiny {
+  background: var(--navy-700);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+}
+.btn--tiny:hover { border-color: var(--electric-blue); }
+.btn--danger:hover { border-color: var(--red); color: var(--red); }
+
+/* MapLibre GL popup theming */
+.maplibregl-popup-content {
+  background: var(--navy-900);
+  color: var(--paper);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.maplibregl-popup-tip { border-top-color: var(--navy-900) !important; border-bottom-color: var(--navy-900) !important; }
+.outage-popup__suburb { font-weight: 700; margin-bottom: 4px; }
+.outage-popup__row { font-size: 0.82rem; color: var(--paper-dim); }
+
+/* --- Auth pages (login/register/report) -------------------------------- */
+
+.auth {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+}
+.auth__card {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+}
+.auth__card h1 {
+  font-family: var(--font-display);
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+.auth__card .admin-form { margin-top: 16px; }
+.auth__card .admin-form button { width: 100%; margin-top: 4px; }
+.auth__switch {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--paper-dim);
+  font-size: 0.88rem;
+}
+
+/* --- Dashboard -------------------------------------------------------- */
+
+.dashboard {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+.dashboard__header {
+  margin-bottom: 24px;
+}
+.dashboard__header h1 {
+  font-family: var(--font-display);
+  margin: 0 0 4px;
+}
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 760px) {
+  .dashboard__grid { grid-template-columns: 1fr; }
+}
+.dashboard__panel {
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.dashboard__panel h2 {
+  font-family: var(--font-display);
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+}
+.favourites-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.favourites-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy-800);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+/* --- National summary banner (real PNG Power figures) ------------------- */
+
+.national-summary {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+  background: var(--electric-blue-dim);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+.national-summary__label { font-weight: 600; color: var(--paper); }
+.national-summary__link { margin-left: auto; font-size: 0.78rem; }
+.stat-strip__label {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--paper-dim);
+}
+
+/* --- Weather widget (homepage) ------------------------------------------ */
+
+.weather-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--navy-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+}
+.weather-widget__icon { font-size: 1.3rem; }
+.weather-widget--severe {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* --- Weather correlation (admin) ---------------------------------------- */
+
+.weather-correlation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.weather-correlation__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy-800);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-size: 0.88rem;
+}
+
+/* --- Report page confidence hint ---------------------------------------- */
+
+.confidence-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--paper-dim);
+}

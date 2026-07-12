@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Log in &mdash; Port Moresby Power Outage Tracker{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <div class="auth__card">
+    <h1>Log in</h1>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="POST" action="{{ url_for('login') }}" class="admin-form">
+      <label>Email
+        <input type="email" name="email" required autocomplete="email">
+      </label>
+      <label>Password
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button type="submit">Log in</button>
+    </form>
+    <p class="auth__switch">No account yet? <a href="{{ url_for('register') }}">Create one</a></p>
+  </div>
+</section>
+{% endblock %}

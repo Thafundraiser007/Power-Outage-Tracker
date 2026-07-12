@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &mdash; Port Moresby Power Outage Tracker{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+  <div class="dashboard__header">
+    <h1>Your dashboard</h1>
+    <p class="muted">{{ user.email }} &middot; <a href="{{ url_for('logout') }}">Log out</a></p>
+  </div>
+
+  <div class="dashboard__grid">
+    <div class="dashboard__panel">
+      <h2>Favourite suburbs</h2>
+      <p class="muted">Outages in these suburbs show up first below.</p>
+
+      {% if favourites %}
+        <ul class="favourites-list">
+          {% for f in favourites %}
+          <li>
+            <span>{{ f.label + ' — ' if f.label else '' }}{{ f.suburb }}</span>
+            <form method="POST" action="{{ url_for('favourites_remove', suburb=f.suburb) }}">
+              <button type="submit" class="btn--tiny">Remove</button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">No favourites saved yet.</p>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('favourites_add') }}" class="admin-form" style="margin-top:16px;">
+        <div class="admin-form__row">
+          <label>Suburb
+            <select name="suburb" required>
+              {% for suburb in all_suburbs %}<option value="{{ suburb }}">{{ suburb }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Nickname (optional)
+            <input type="text" name="label" placeholder="Home, Work...">
+          </label>
+        </div>
+        <button type="submit">Add favourite</button>
+      </form>
+    </div>
+
+    <div class="dashboard__panel">
+      <h2>Outages in your favourite suburbs</h2>
+      {% if relevant_outages %}
+        <div class="outage-cards-scroll" style="max-height:400px;">
+          {% for o in relevant_outages %}
+          <div class="outage-card">
+            <div class="outage-card__top">
+              <span class="outage-card__suburb">{{ o.suburb }}</span>
+              <span class="badge badge--{{ o.status|lower|replace(' ', '-') }}">{{ o.status }}</span>
+            </div>
+            {% if o.reason %}<div class="outage-card__reason">{{ o.reason }}</div>{% endif %}
+            <div class="outage-card__times">
+              {% if o.time_started %}Started {{ o.time_started }}{% endif %}
+              {% if o.confidence_score %} &middot; Confidence {{ o.confidence_score }}%{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No outages currently reported in your favourite suburbs. Good news!</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

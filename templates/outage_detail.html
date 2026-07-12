@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if outage %}{{ outage.suburb }} outage &mdash; {% endif %}Port Moresby Power Outage Tracker
+{% endblock %}
+
+{% block content %}
+<section class="admin">
+  {% if not outage %}
+    <div class="admin__login">
+      <h1>Outage not found</h1>
+      <p><a href="{{ url_for('index') }}">&larr; Back to the map</a></p>
+    </div>
+  {% else %}
+    <div class="admin__header">
+      <h1>{{ outage.suburb }} &mdash; {{ outage.reason or outage.outage_type or 'Outage' }}</h1>
+      <span class="badge badge--{{ outage.status|lower|replace(' ', '-') }}">{{ outage.status }}</span>
+    </div>
+
+    <div class="dashboard__grid">
+      <div class="dashboard__panel">
+        <h2>Details</h2>
+        <table class="admin-table">
+          <tbody>
+            <tr><td>Suburb</td><td>{{ outage.suburb }}</td></tr>
+            <tr><td>Status</td><td>{{ outage.status }}</td></tr>
+            <tr><td>Type</td><td>{{ outage.outage_type or '—' }}</td></tr>
+            <tr><td>Started</td><td>{{ outage.date }} {{ outage.time_started or '' }}</td></tr>
+            {% if outage.estimated_restoration %}<tr><td>Estimated restoration</td><td>{{ outage.estimated_restoration }}</td></tr>{% endif %}
+            {% if outage.actual_restoration %}<tr><td>Actual restoration</td><td>{{ outage.actual_restoration }}</td></tr>{% endif %}
+            <tr><td>Confidence</td><td>{{ outage.confidence_score }}% ({{ outage.report_count }} report{{ 's' if outage.report_count != 1 else '' }}{% if outage.verified_by_admin %}, admin-verified{% endif %})</td></tr>
+            <tr><td>Source</td><td>{{ outage.source or '—' }}</td></tr>
+            {% if weather_summary %}<tr><td>Weather at time of report</td><td>{{ weather_summary }}</td></tr>{% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dashboard__panel">
+        <h2>Timeline</h2>
+        {% if timeline %}
+        <ul class="favourites-list">
+          {% for event in timeline %}
+          <li style="flex-direction:column; align-items:flex-start; gap:2px;">
+            <span style="font-family:var(--font-mono); font-size:0.78rem; color:var(--paper-dim);">{{ event.created_at }}</span>
+            <span><strong>{{ event.event_type|replace('_', ' ')|capitalize }}</strong>{% if event.detail %} — {{ event.detail }}{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No timeline events recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if reports %}
+    <div class="admin__add" style="margin-top:20px;">
+      <h2>Reports ({{ reports|length }})</h2>
+      {% for r in reports %}
+      <div class="outage-card" style="margin-bottom:10px;">
+        <div class="outage-card__times">{{ r.created_at }}</div>
+        <div class="outage-card__reason">{{ r.description }}</div>
+        {% if r.photo_path %}
+          <img src="{{ url_for('static', filename=r.photo_path) }}" alt="Report photo" style="max-width:200px; border-radius:var(--radius); margin-top:6px;">
+        {% endif %}
+        {% if is_admin and r.reporter_contact %}
+          <div class="outage-card__times">Contact: {{ r.reporter_contact }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <p style="margin-top:20px;"><a href="{{ url_for('index') }}">&larr; Back to the map</a></p>
+  {% endif %}
+</section>
+{% endblock %}
