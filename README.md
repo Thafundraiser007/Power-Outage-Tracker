@@ -5,7 +5,13 @@ A Flask + MapLibre GL JS web application that tracks power outages across Port M
 The platform provides outage visibility through a dashboard, suburb-based search, status filtering, user reporting, and an administration system for managing verified outage information.
 
 ---
+## Live Demo
 
+View the deployed application:
+
+https://power-outage-tracker-3ej2.onrender.com
+
+---
 # Purpose
 
 This project was developed to demonstrate real-world infrastructure monitoring concepts by combining:
